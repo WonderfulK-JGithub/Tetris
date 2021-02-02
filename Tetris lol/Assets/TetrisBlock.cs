@@ -6,6 +6,8 @@ public class TetrisBlock : MonoBehaviour
 {
     public int stageWidth;
 
+    public Sprite representSprite;
+
     public Vector3 rotatePoint;
 
     //vertical
@@ -114,10 +116,13 @@ public class TetrisBlock : MonoBehaviour
             if (!AllowMove())
             {
                 if (!AllowMove()) transform.position += Vector3.up;
-                this.enabled = false;
-                
+               
+
                 AddToGrid();
                 gridManager.CheckLines();
+
+                transform.DetachChildren();
+                Destroy(gameObject);
             }
             curTime = 0;
         }
@@ -138,7 +143,7 @@ public class TetrisBlock : MonoBehaviour
     {
         foreach (Transform child in transform)
         { 
-            if (child.transform.position.x < 0f || child.transform.position.x > stageWidth || child.transform.position.y < 0f)
+            if (child.transform.position.x < 0f || child.transform.position.x > stageWidth || child.transform.position.y < 0f || child.transform.position.y > 20)
             {
                 return false;
             }
