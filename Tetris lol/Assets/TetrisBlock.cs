@@ -22,11 +22,13 @@ public class TetrisBlock : MonoBehaviour
     public float xSpeed;
 
     GridManager gridManager;
+    AudioManager audioManager;
 
     // Start is called before the first frame update
     void Start()
     {
         gridManager = FindObjectOfType<GridManager>();
+        audioManager = FindObjectOfType<AudioManager>();
     }
 
     // Update is called once per frame
@@ -90,32 +92,43 @@ public class TetrisBlock : MonoBehaviour
         #endregion
         //rotation
         #region 
-        if (Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
             
             transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, 90);
 
-            if (!AllowMove()) transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, -90);
+            if (!AllowMove())
+            {
+                transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, -90);
+                audioManager.source.PlayOneShot(audioManager.errorClip);
+            }
+            else audioManager.source.PlayOneShot(audioManager.rotateClip);
 
         }
-        if (Input.GetKeyDown(KeyCode.Z))
+        if (Input.GetKeyDown(KeyCode.X))
         {
 
             transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, -90);
 
-            if (!AllowMove()) transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, 90);
+            if (!AllowMove())
+            {
+                transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, 90);
+                audioManager.source.PlayOneShot(audioManager.errorClip);
+            }
+            else audioManager.source.PlayOneShot(audioManager.rotateClip);
 
         }
         #endregion
 
+        //falling
         curTime += 1 * Time.deltaTime;
-
+        
         if (curTime >= (Input.GetKey(KeyCode.DownArrow) ? fallTime / speedAmp : fallTime))
         {
             transform.position += Vector3.down;
             if (!AllowMove())
             {
-                if (!AllowMove()) transform.position += Vector3.up;
+                transform.position += Vector3.up;
                
 
                 AddToGrid();
@@ -125,6 +138,12 @@ public class TetrisBlock : MonoBehaviour
                 Destroy(gameObject);
             }
             curTime = 0;
+        }
+
+        //Instante fall
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            Landing();
         }
     }
 
@@ -137,6 +156,47 @@ public class TetrisBlock : MonoBehaviour
     {
         transform.position += Vector3.right;
         if (!AllowMove()) transform.position += Vector3.left;
+    }
+
+    void Landing()
+    {
+        audioManager.source.PlayOneShot(audioManager.bopClip);
+        transform.position += Vector3.down;
+        if(AllowMove())
+        {
+            transform.position += Vector3.up;
+            Vector3 ogPos = transform.position;
+            bool canFall = true;
+
+
+            while (canFall)
+            {
+                transform.position += Vector3.down;
+                canFall = AllowMove();
+            }
+
+            transform.position += Vector3.up;
+
+
+            AddToGrid();
+            gridManager.CheckLines();
+
+            transform.DetachChildren();
+            Destroy(gameObject);
+        }
+        else
+        {
+            transform.position += Vector3.up;
+
+
+            AddToGrid();
+            gridManager.CheckLines();
+
+            transform.DetachChildren();
+            Destroy(gameObject);
+        }
+
+        
     }
 
     bool AllowMove()

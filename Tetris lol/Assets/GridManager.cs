@@ -14,7 +14,14 @@ using UnityEngine.UI;
 
 public class GridManager : MonoBehaviour
 {
+    public AudioManager audioManager;
+
     public  SmallCube[,] grid = new SmallCube[10, 20];
+
+    GameObject activeBlock;
+    GameObject currentBlock;
+    GameObject holdBlock;
+    bool AllowSwitching = true;
     
     /*
     public GameObject orangeBlock;
@@ -33,9 +40,11 @@ public class GridManager : MonoBehaviour
     List<SmallCube> deleteCubes = new List<SmallCube>();
     List<int> lineMoves = new List<int>();
 
-    public Image image0;
-    public Image image1;
-    public Image image2;
+    public SpriteRenderer sprite0;
+    public SpriteRenderer sprite1;
+    public SpriteRenderer sprite2;
+
+    public SpriteRenderer holdSprite;
     private void Start()
     {
         int random = Random.Range(0, 7);
@@ -52,11 +61,55 @@ public class GridManager : MonoBehaviour
 
         SpawnNewBlock();
     }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.C))
+        {
+            if(AllowSwitching)
+            {
+                SaveBlock();
+            }
+            else
+            {
+                audioManager.source.PlayOneShot(audioManager.errorClip);
+            }
+        }
+    }
     //ingame Stuff
     #region
+
+    void SaveBlock()
+    {
+        GameObject heldBlock = holdBlock;
+        holdBlock = currentBlock;
+        Destroy(activeBlock);
+        if(heldBlock != null)
+        {
+            currentBlock = heldBlock;
+            activeBlock = Instantiate(currentBlock);
+        }
+        else
+        {
+            currentBlock = nextBlocks[0];
+            activeBlock = Instantiate(nextBlocks[0]);
+
+            nextBlocks.RemoveAt(0);
+
+            int random = Random.Range(0, 7);
+            nextBlocks.Add(cubeArray[random]);
+
+            UpdatePreview();
+        }
+        AllowSwitching = false;
+
+        UpdateHold();
+    }
+
     void SpawnNewBlock()
     {
-        Instantiate(nextBlocks[0]);
+        currentBlock = nextBlocks[0];
+        activeBlock = Instantiate(nextBlocks[0]);
 
         nextBlocks.RemoveAt(0);
 
@@ -64,6 +117,8 @@ public class GridManager : MonoBehaviour
         nextBlocks.Add(cubeArray[random]);
 
         UpdatePreview();
+
+        AllowSwitching = true;
     }
     public void CheckLines()
     {
@@ -95,6 +150,8 @@ public class GridManager : MonoBehaviour
     }
     IEnumerator DeleteLines()
     {
+        if (deleteCubes.Count > 0) audioManager.source.PlayOneShot(audioManager.lineClearClip);
+
         foreach (var cube in deleteCubes)
         {
             
@@ -112,8 +169,6 @@ public class GridManager : MonoBehaviour
 
         lineMoves.Clear();
     }
-
-
     void MoveLines()
     {
 
@@ -147,8 +202,13 @@ public class GridManager : MonoBehaviour
         nextSprites.RemoveAt(0);
         nextSprites.Add(nextBlocks[2].GetComponent<TetrisBlock>().representSprite);
 
-        image0.sprite = nextSprites[0];
-        image1.sprite = nextSprites[1];
-        image2.sprite = nextSprites[2];
+        sprite0.sprite = nextSprites[0];
+        sprite1.sprite = nextSprites[1];
+        sprite2.sprite = nextSprites[2];
+    }
+
+    void UpdateHold()
+    {
+        holdSprite.sprite = holdBlock.GetComponent<TetrisBlock>().representSprite;
     }
 }
