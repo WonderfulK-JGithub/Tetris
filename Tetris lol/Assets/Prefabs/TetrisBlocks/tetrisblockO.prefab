@@ -54,6 +54,8 @@ MonoBehaviour:
   speedAmp: 10
   xTimebuffer: 0.3
   xSpeed: 0.1
+  shadowPrefab: {fileID: 8829020973307884840, guid: d2b8d601c32180e418332bd5230ad6b8,
+    type: 3}
 --- !u!1001 &295645979367375009
 PrefabInstance:
   m_ObjectHideFlags: 0

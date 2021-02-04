@@ -11,7 +11,7 @@ public class TetrisBlock : MonoBehaviour
     public Vector3 rotatePoint;
 
     //vertical
-    public float fallTime;
+    float fallTime;
     float curTime;
     public float speedAmp;
 
@@ -35,6 +35,8 @@ public class TetrisBlock : MonoBehaviour
 
         shadow = Instantiate(shadowPrefab);
         UppdateShadow();
+
+        fallTime = gridManager.tetrisSpeed;
     }
 
     // Update is called once per frame
@@ -130,7 +132,7 @@ public class TetrisBlock : MonoBehaviour
         #endregion
 
         //falling
-        curTime += 1 * Time.deltaTime;
+        curTime += 60 * Time.deltaTime;
         
         if (curTime >= (Input.GetKey(KeyCode.DownArrow) ? fallTime / speedAmp : fallTime))
         {
@@ -187,6 +189,8 @@ public class TetrisBlock : MonoBehaviour
             {
                 transform.position += Vector3.down;
                 canFall = AllowMove();
+                gridManager.score++;
+                gridManager.UpdateScore();
             }
 
             transform.position += Vector3.up;

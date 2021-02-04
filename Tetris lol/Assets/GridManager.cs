@@ -14,14 +14,23 @@ using UnityEngine.UI;
 
 public class GridManager : MonoBehaviour
 {
+    public float tetrisSpeed;
+
     public AudioManager audioManager;
 
     public  SmallCube[,] grid = new SmallCube[10, 20];
-
+    
     GameObject activeBlock;
     GameObject currentBlock;
     GameObject holdBlock;
     bool AllowSwitching = true;
+
+    public int score = 0;
+    public int level;
+    int linesCleared = 0;
+
+    public Text scoreText;
+    public Text levelText;
     
     /*
     public GameObject orangeBlock;
@@ -47,15 +56,15 @@ public class GridManager : MonoBehaviour
     public SpriteRenderer holdSprite;
     private void Start()
     {
-        int random = Random.Range(0, 1);
+        int random = Random.Range(0, 7);
         nextBlocks.Add(cubeArray[random]);
         nextSprites.Add(nextBlocks[0].GetComponent<TetrisBlock>().representSprite);
 
-        random = Random.Range(0, 1);
+        random = Random.Range(0, 7);
         nextBlocks.Add(cubeArray[random]);
         nextSprites.Add(nextBlocks[1].GetComponent<TetrisBlock>().representSprite);
 
-        random = Random.Range(0, 1);
+        random = Random.Range(0, 7);
         nextBlocks.Add(cubeArray[random]);
         nextSprites.Add(nextBlocks[2].GetComponent<TetrisBlock>().representSprite);
 
@@ -167,6 +176,24 @@ public class GridManager : MonoBehaviour
 
         MoveLines();
 
+        switch(lineMoves.Count)
+        {
+            case 1:
+                score += 40;
+                break;
+            case 2:
+                score += 100;
+                break;
+            case 3:
+                score += 300;
+                break;
+            case 4:
+                score += 1200;
+                break;
+        }
+        if (lineMoves.Count != 0) UpdateScore();
+        
+
         lineMoves.Clear();
     }
     void MoveLines()
@@ -189,7 +216,49 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+        CheckLevel();
         SpawnNewBlock();
+    }
+
+    public void CheckLevel()
+    {
+        linesCleared += lineMoves.Count;
+        if (linesCleared >= 10)
+        {
+            
+            level++;
+            linesCleared -= 10;
+            UpdateLevel();
+
+            if (level < 9)
+            {
+                tetrisSpeed -= 5;
+            }
+            else if(level == 9)
+            {
+                tetrisSpeed = 6;
+            }
+            else if(level > 13)
+            {
+                tetrisSpeed = 5;
+            }
+            else if(level > 16)
+            {
+                tetrisSpeed = 4;
+            }
+            else if(level > 19)
+            {
+                tetrisSpeed = 3;
+            }
+            else if(level > 29)
+            {
+                tetrisSpeed = 2;
+            }
+            else
+            {
+                tetrisSpeed = 1;
+            }
+        }
     }
     #endregion
 
@@ -210,5 +279,15 @@ public class GridManager : MonoBehaviour
     void UpdateHold()
     {
         holdSprite.sprite = holdBlock.GetComponent<TetrisBlock>().representSprite;
+    }
+
+    public void UpdateScore()
+    {
+        scoreText.text = score.ToString();
+    }
+
+    void UpdateLevel()
+    {
+        levelText.text = level.ToString();
     }
 }
