@@ -24,16 +24,23 @@ public class TetrisBlock : MonoBehaviour
     GridManager gridManager;
     AudioManager audioManager;
 
+    public GameObject shadowPrefab;
+    GameObject shadow;
+
     // Start is called before the first frame update
     void Start()
     {
         gridManager = FindObjectOfType<GridManager>();
         audioManager = FindObjectOfType<AudioManager>();
+
+        shadow = Instantiate(shadowPrefab);
+        UppdateShadow();
     }
 
     // Update is called once per frame
     void Update()
     {
+        
         //left and right movement
         #region
         /*
@@ -103,6 +110,7 @@ public class TetrisBlock : MonoBehaviour
                 audioManager.source.PlayOneShot(audioManager.errorClip);
             }
             else audioManager.source.PlayOneShot(audioManager.rotateClip);
+            UppdateShadow();
 
         }
         if (Input.GetKeyDown(KeyCode.X))
@@ -116,6 +124,7 @@ public class TetrisBlock : MonoBehaviour
                 audioManager.source.PlayOneShot(audioManager.errorClip);
             }
             else audioManager.source.PlayOneShot(audioManager.rotateClip);
+            UppdateShadow();
 
         }
         #endregion
@@ -136,6 +145,7 @@ public class TetrisBlock : MonoBehaviour
 
                 transform.DetachChildren();
                 Destroy(gameObject);
+                
             }
             curTime = 0;
         }
@@ -151,11 +161,15 @@ public class TetrisBlock : MonoBehaviour
     {
         transform.position += Vector3.left;
         if (!AllowMove()) transform.position += Vector3.right;
+
+        UppdateShadow();
     }
     void GoRight()
     {
         transform.position += Vector3.right;
         if (!AllowMove()) transform.position += Vector3.left;
+
+        UppdateShadow();
     }
 
     void Landing()
@@ -183,6 +197,7 @@ public class TetrisBlock : MonoBehaviour
 
             transform.DetachChildren();
             Destroy(gameObject);
+            
         }
         else
         {
@@ -194,6 +209,7 @@ public class TetrisBlock : MonoBehaviour
 
             transform.DetachChildren();
             Destroy(gameObject);
+            
         }
 
         
@@ -230,5 +246,34 @@ public class TetrisBlock : MonoBehaviour
 
             gridManager.grid[roundX, roundY] = child.GetComponent<SmallCube>();
         }
+    }
+
+
+    void UppdateShadow()
+    {
+        shadow.transform.rotation = transform.rotation;
+
+        int i = 0;
+        Vector3 ogPos = transform.position;
+        Vector3 newPos;
+        bool canFall = true;
+
+
+        while (canFall)
+        {
+            transform.position += Vector3.down;
+            canFall = AllowMove();
+            i++;
+        }
+        
+        transform.position += Vector3.up;
+        newPos = transform.position;
+        transform.position = ogPos;
+        shadow.transform.position = newPos;
+    }
+
+    private void OnDestroy()
+    {
+        Destroy(shadow);
     }
 }

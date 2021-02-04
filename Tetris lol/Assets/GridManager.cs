@@ -47,15 +47,15 @@ public class GridManager : MonoBehaviour
     public SpriteRenderer holdSprite;
     private void Start()
     {
-        int random = Random.Range(0, 7);
+        int random = Random.Range(0, 1);
         nextBlocks.Add(cubeArray[random]);
         nextSprites.Add(nextBlocks[0].GetComponent<TetrisBlock>().representSprite);
 
-        random = Random.Range(0, 7);
+        random = Random.Range(0, 1);
         nextBlocks.Add(cubeArray[random]);
         nextSprites.Add(nextBlocks[1].GetComponent<TetrisBlock>().representSprite);
 
-        random = Random.Range(0, 7);
+        random = Random.Range(0, 1);
         nextBlocks.Add(cubeArray[random]);
         nextSprites.Add(nextBlocks[2].GetComponent<TetrisBlock>().representSprite);
 
