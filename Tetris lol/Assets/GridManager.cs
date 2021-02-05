@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
+using UnityEngine.SceneManagement;
 
 
 
 /*Maneging the grid
  * also maneging the UI
  * and sceneTransitioning
+ * and file management
  */
 
 
@@ -23,12 +26,14 @@ public class GridManager : MonoBehaviour
     GameObject activeBlock;
     GameObject currentBlock;
     GameObject holdBlock;
-    bool AllowSwitching = true;
+    bool allowSwitching = true;
 
     public int score = 0;
     public int level;
     int linesCleared = 0;
+    public float dissolveSpeed;
 
+    public int highScore;
     public Text scoreText;
     public Text levelText;
     
@@ -54,6 +59,13 @@ public class GridManager : MonoBehaviour
     public SpriteRenderer sprite2;
 
     public SpriteRenderer holdSprite;
+
+    public GameObject gameOverScreen;
+    public Image overlayImage;
+    public Text thisScoreText;
+    public Text highscoreText;
+
+
     private void Start()
     {
         int random = Random.Range(0, 7);
@@ -69,13 +81,15 @@ public class GridManager : MonoBehaviour
         nextSprites.Add(nextBlocks[2].GetComponent<TetrisBlock>().representSprite);
 
         SpawnNewBlock();
+
+        Load();
     }
 
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.C))
         {
-            if(AllowSwitching)
+            if(allowSwitching)
             {
                 SaveBlock();
             }
@@ -110,7 +124,7 @@ public class GridManager : MonoBehaviour
 
             UpdatePreview();
         }
-        AllowSwitching = false;
+        allowSwitching = false;
 
         UpdateHold();
     }
@@ -127,7 +141,7 @@ public class GridManager : MonoBehaviour
 
         UpdatePreview();
 
-        AllowSwitching = true;
+        allowSwitching = true;
     }
     public void CheckLines()
     {
@@ -159,20 +173,30 @@ public class GridManager : MonoBehaviour
     }
     IEnumerator DeleteLines()
     {
-        if (deleteCubes.Count > 0) audioManager.source.PlayOneShot(audioManager.lineClearClip);
-
-        foreach (var cube in deleteCubes)
+        if (deleteCubes.Count > 0)
         {
-            
-            //do shader stuff here, for now this will do
-            //"!#"!#"!#
-            //!!!!!
-            Destroy(cube.gameObject);
+            audioManager.source.PlayOneShot(audioManager.lineClearClip);
+
+            float time = 1;
+
+            while (time > 0)
+            {
+                time -= dissolveSpeed;
+                if (time < 0) time = 0;
+                foreach (var cube in deleteCubes)
+                {
+                    cube.rend.material.SetFloat("_time", time);
+                }
+                yield return null;
+            }
+
+            foreach (var cube in deleteCubes)
+            {
+                Destroy(cube.gameObject);
+            }
+
+            deleteCubes.Clear();
         }
-
-        yield return null;
-
-        deleteCubes.Clear();
 
         MoveLines();
 
@@ -289,5 +313,61 @@ public class GridManager : MonoBehaviour
     void UpdateLevel()
     {
         levelText.text = level.ToString();
+    }
+
+
+    //ENDGAME
+    public void GameOver()
+    {
+        if(score > highScore)
+        {
+            Save();
+        }
+        Load();
+
+        allowSwitching = false;
+        gameOverScreen.SetActive(true);
+        overlayImage.enabled = true;
+
+        thisScoreText.text += score.ToString();
+        highscoreText.text += highScore.ToString();
+    }
+
+    public void Save()
+    {
+        SaveData nyData = new SaveData();
+
+        nyData.bestScore = score;
+
+        string nyJson = JsonUtility.ToJson(nyData);
+
+        print(nyJson);
+
+        File.WriteAllText(Application.persistentDataPath + "/save.txt", nyJson);
+    }
+
+    public void Load()
+    {
+        if (File.Exists(Application.persistentDataPath + "/save.txt"))
+        {
+            string gammalJson = File.ReadAllText(Application.persistentDataPath + "/save.txt");
+
+            SaveData gammalData = JsonUtility.FromJson<SaveData>(gammalJson);
+
+            highScore = gammalData.bestScore;
+
+            print(highScore);
+        }
+        else highScore = 0;
+       
+    }
+
+    public void PlayAgain()
+    {
+        SceneManager.LoadScene(1);
+    }
+    public void MainMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 }

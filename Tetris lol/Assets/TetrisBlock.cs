@@ -37,6 +37,12 @@ public class TetrisBlock : MonoBehaviour
         UppdateShadow();
 
         fallTime = gridManager.tetrisSpeed;
+
+        if(!AllowMove())
+        {
+            gridManager.GameOver();
+            Destroy(gameObject);
+        }
     }
 
     // Update is called once per frame

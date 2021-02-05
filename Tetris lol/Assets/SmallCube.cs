@@ -4,17 +4,16 @@ using UnityEngine;
 
 public class SmallCube : MonoBehaviour
 {
-
-   
-    // Start is called before the first frame update
+    
+    public SpriteRenderer rend;
+    
+    
+    
     void Start()
     {
-        
+        rend = GetComponent<SpriteRenderer>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
+   
 }
