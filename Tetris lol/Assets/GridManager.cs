@@ -65,6 +65,9 @@ public class GridManager : MonoBehaviour
     public Text thisScoreText;
     public Text highscoreText;
 
+    public bool pause;
+    bool allowPause = true;
+    public Text pauseText;
 
     private void Start()
     {
@@ -97,6 +100,13 @@ public class GridManager : MonoBehaviour
             {
                 audioManager.source.PlayOneShot(audioManager.errorClip);
             }
+        }
+
+        if(Input.GetKeyDown(KeyCode.Return) && allowPause)
+        {
+            pause = !pause;
+            overlayImage.enabled = !overlayImage.enabled;
+            pauseText.enabled = !pauseText.enabled;
         }
     }
     //ingame Stuff

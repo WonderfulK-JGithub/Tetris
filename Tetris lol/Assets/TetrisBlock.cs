@@ -10,6 +10,8 @@ public class TetrisBlock : MonoBehaviour
 
     public Vector3 rotatePoint;
 
+    Vector3[] smartRotationVectors = new Vector3[4];
+
     //vertical
     float fallTime;
     float curTime;
@@ -43,126 +45,157 @@ public class TetrisBlock : MonoBehaviour
             gridManager.GameOver();
             Destroy(gameObject);
         }
+
+
+        smartRotationVectors[0] = new Vector3(0, 1, 0);
+        smartRotationVectors[1] = new Vector3(0, -1, 0);
+        smartRotationVectors[2] = new Vector3(1, 0, 0);
+        smartRotationVectors[3] = new Vector3(-1, 0, 0);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-        //left and right movement
-        #region
-        /*
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if(!gridManager.pause)
         {
-            transform.position += Vector3.left;
-            if (!AllowMove()) transform.position += Vector3.right;
-        }
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            transform.position += Vector3.right;
-            if (!AllowMove()) transform.position += Vector3.left;
-        }
-        */
-        xTime -= Time.deltaTime * 1; 
-        if (goLeft)
-        {
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                goLeft = false;
-                GoRight();
-                xTime = xTimebuffer;
-            }
-            else if (Input.GetKey(KeyCode.LeftArrow))
-            {
-               
-                if(xTime <= 0)
-                {
-                    xTime = xSpeed;
-                    GoLeft();
-                }
-            }
-            else xTime = 0f;
-
-        }
-        else
-        {
+            //left and right movement
+            #region
+            /*
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                goLeft = true;
-                GoLeft();
-                xTime = xTimebuffer;
+                transform.position += Vector3.left;
+                if (!AllowMove()) transform.position += Vector3.right;
             }
-            else if (Input.GetKey(KeyCode.RightArrow))
+            if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                
-                if (xTime <= 0)
+                transform.position += Vector3.right;
+                if (!AllowMove()) transform.position += Vector3.left;
+            }
+            */
+            xTime -= Time.deltaTime * 1;
+            if (goLeft)
+            {
+                if (Input.GetKeyDown(KeyCode.RightArrow))
                 {
-                    xTime = xSpeed;
+                    goLeft = false;
                     GoRight();
+                    xTime = xTimebuffer;
                 }
+                else if (Input.GetKey(KeyCode.LeftArrow))
+                {
+
+                    if (xTime <= 0)
+                    {
+                        xTime = xSpeed;
+                        GoLeft();
+                    }
+                }
+                else xTime = 0f;
+
             }
-            else xTime = 0f;
-        }
-
-        #endregion
-        //rotation
-        #region 
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            
-            transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, 90);
-
-            if (!AllowMove())
+            else
             {
-                transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, -90);
-                audioManager.source.PlayOneShot(audioManager.errorClip);
+                if (Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    goLeft = true;
+                    GoLeft();
+                    xTime = xTimebuffer;
+                }
+                else if (Input.GetKey(KeyCode.RightArrow))
+                {
+
+                    if (xTime <= 0)
+                    {
+                        xTime = xSpeed;
+                        GoRight();
+                    }
+                }
+                else xTime = 0f;
             }
-            else audioManager.source.PlayOneShot(audioManager.rotateClip);
-            UppdateShadow();
 
-        }
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-
-            transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, -90);
-
-            if (!AllowMove())
+            #endregion
+            //rotation
+            #region 
+            if (Input.GetKeyDown(KeyCode.Z))
             {
+
                 transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, 90);
-                audioManager.source.PlayOneShot(audioManager.errorClip);
+
+                if (!AllowMove())
+                {
+                    if (!SmartRotation())
+                    {
+                        transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, -90);
+                        audioManager.source.PlayOneShot(audioManager.errorClip);
+                    }
+                    else audioManager.source.PlayOneShot(audioManager.rotateClip);
+                }
+                else audioManager.source.PlayOneShot(audioManager.rotateClip);
+                UppdateShadow();
+
             }
-            else audioManager.source.PlayOneShot(audioManager.rotateClip);
-            UppdateShadow();
-
-        }
-        #endregion
-
-        //falling
-        curTime += 60 * Time.deltaTime;
-        
-        if (curTime >= (Input.GetKey(KeyCode.DownArrow) ? fallTime / speedAmp : fallTime))
-        {
-            transform.position += Vector3.down;
-            if (!AllowMove())
+            if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.UpArrow))
             {
-                transform.position += Vector3.up;
-               
 
-                AddToGrid();
-                gridManager.CheckLines();
+                transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, -90);
 
-                transform.DetachChildren();
-                Destroy(gameObject);
-                
+                if (!AllowMove())
+                {
+                    if (!SmartRotation())
+                    {
+                        transform.RotateAround(transform.TransformPoint(rotatePoint), Vector3.forward, 90);
+                        audioManager.source.PlayOneShot(audioManager.errorClip);
+                    }
+                    else audioManager.source.PlayOneShot(audioManager.rotateClip);
+                }
+                else audioManager.source.PlayOneShot(audioManager.rotateClip);
+                UppdateShadow();
+
             }
-            curTime = 0;
+            #endregion
+
+            //falling
+            curTime += 60 * Time.deltaTime;
+
+            if (curTime >= (Input.GetKey(KeyCode.DownArrow) ? fallTime / speedAmp : fallTime))
+            {
+                transform.position += Vector3.down;
+                if (!AllowMove())
+                {
+                    transform.position += Vector3.up;
+
+
+                    AddToGrid();
+                    gridManager.CheckLines();
+
+                    transform.DetachChildren();
+                    Destroy(gameObject);
+
+                }
+                curTime = 0;
+            }
+
+            //Instante fall
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Landing();
+            }
+        }
+        
+    }
+
+    bool SmartRotation()
+    {
+        Vector3 ogPos = transform.position;
+
+        foreach (var vec3 in smartRotationVectors)
+        {
+            transform.position = ogPos + vec3;
+            if (AllowMove()) return true;
         }
 
-        //Instante fall
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            Landing();
-        }
+        transform.position = ogPos;
+        return false;
     }
 
     void GoLeft()
