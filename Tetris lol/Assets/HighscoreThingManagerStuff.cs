@@ -12,6 +12,7 @@ public class HighscoreThingManagerStuff : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //Samma LOAD kod som GridManager
         if (File.Exists(Application.persistentDataPath + "/save.txt"))
         {
             string gammalJson = File.ReadAllText(Application.persistentDataPath + "/save.txt");
@@ -24,10 +25,12 @@ public class HighscoreThingManagerStuff : MonoBehaviour
         }
         else highScore = 0;
 
+        //uppdarera text och skaffa referense till text
         text = GetComponent<Text>();
         text.text += highScore.ToString();
     }
 
+    //knappfunktion som startar spelet
     public void StartGame()
     {
         SceneManager.LoadScene(1);

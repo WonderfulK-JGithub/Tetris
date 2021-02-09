@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -1395,7 +1395,7 @@ MonoBehaviour:
   audioManager: {fileID: 1314732449}
   score: 0
   level: 0
-  dissolveSpeed: 0.01
+  dissolveSpeed: 0.02
   highScore: 0
   scoreText: {fileID: 933329983}
   levelText: {fileID: 200926410}

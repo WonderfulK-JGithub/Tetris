@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SmallCube : MonoBehaviour
 {
-    
+    //referense till kubens renderer, så gridManagern ska kunna accessa shadern
     public SpriteRenderer rend;
     
     
